@@ -1,7 +1,12 @@
 import { AttachmentBuilder, Client } from "discord.js";
 import "dotenv/config";
 import { execSync } from "child_process";
-import { createReadStream, rmSync, writeFileSync } from "fs";
+import { createReadStream, existsSync, rmSync, writeFileSync } from "fs";
+
+if (!existsSync("./zxtune123")) {
+  console.log("zxtune CLI not found");
+  process.exit(1);
+}
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "MessageContent"],
