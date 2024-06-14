@@ -30,7 +30,7 @@ client.on("messageCreate", async (message) => {
 
         const wavFile = createReadStream(`./${attachment.name}.wav`);
 
-        reply.edit({
+        await reply.edit({
           content: "done",
           files: [
             new AttachmentBuilder()
@@ -41,7 +41,7 @@ client.on("messageCreate", async (message) => {
 
         // Cleanup
         rmSync(attachment.name);
-        // rmSync(`${attachment.name}.wav`);
+        rmSync(wavFile.path);
       }
     }
   }
