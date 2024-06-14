@@ -1,11 +1,7 @@
 import { AttachmentBuilder, Client } from "discord.js";
 import "dotenv/config";
 import { execSync } from "child_process";
-import {
-  createReadStream,
-  rmSync,
-  writeFileSync,
-} from "fs";
+import { createReadStream, rmSync, writeFileSync } from "fs";
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "MessageContent"],
