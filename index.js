@@ -3,8 +3,6 @@ import "dotenv/config";
 import { execSync } from "child_process";
 import {
   createReadStream,
-  createWriteStream,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from "fs";
