@@ -3,10 +3,15 @@ import "dotenv/config";
 import { execSync } from "child_process";
 import { existsSync, writeFileSync, rmSync, readFileSync } from "fs";
 import fetch from "node-fetch";
-import { parseBuffer } from 'music-metadata';
+import { parseBuffer } from "music-metadata";
 
 if (!existsSync("./zxtune123")) {
   console.log("zxtune CLI not found");
+  process.exit(1);
+}
+
+if (!existsSync("./ffmpeg")) {
+  console.log("ffmpeg not found");
   process.exit(1);
 }
 
@@ -25,10 +30,13 @@ client.on("messageCreate", async (message) => {
       const extension = attachment.name.split(".").pop();
 
       if (extension === "pt3") {
-        const reply = await message.reply("🤖 Initiating file conversion to MP3 format. Please standby...");
+        const reply = await message.reply(
+          "🤖 Initiating file conversion to MP3 format. Please standby...",
+        );
 
         const pt3FilePath = `./${attachment.name}`;
         const mp3FilePath = `${pt3FilePath}.mp3`;
+        const mp3But320kFilePath = `${mp3FilePath}-320k.mp3`;
 
         try {
           const file = await fetch(attachment.url);
@@ -37,12 +45,16 @@ client.on("messageCreate", async (message) => {
           writeFileSync(pt3FilePath, buffer);
 
           execSync(`./zxtune123 --mp3 filename=${mp3FilePath} ${pt3FilePath}`);
+          execSync(`./ffmpeg -i ${mp3FilePath} -ab 320k ${mp3But320kFilePath}`);
 
-          const mp3Buffer = readFileSync(mp3FilePath);
+          const mp3Buffer = readFileSync(mp3But320kFilePath);
 
-          const metadata = await parseBuffer(mp3Buffer, { mimeType: 'audio/mpeg', size: mp3Buffer.length });
-          const artist = metadata.common.artist || 'Unknown Artist';
-          const title = metadata.common.title || 'Unknown Title';
+          const metadata = await parseBuffer(mp3Buffer, {
+            mimeType: "audio/mpeg",
+            size: mp3Buffer.length,
+          });
+          const artist = metadata.common.artist || "Unknown Artist";
+          const title = metadata.common.title || "Unknown Title";
 
           await reply.edit({
             content: `🎶 Your track "${title}" by ${artist} is ready for listening! Enjoy! 🎧🔥`,
@@ -54,13 +66,18 @@ client.on("messageCreate", async (message) => {
           });
         } catch (error) {
           console.error("Error during conversion:", error);
-          await reply.edit("🤖 An error occurred during the conversion process. Please try again.");
+          await reply.edit(
+            "🤖 An error occurred during the conversion process. Please try again.",
+          );
         } finally {
           if (existsSync(pt3FilePath)) {
             rmSync(pt3FilePath);
           }
           if (existsSync(mp3FilePath)) {
             rmSync(mp3FilePath);
+          }
+          if (existsSync(mp3But320kFilePath)) {
+            rmSync(mp3But320kFilePath);
           }
         }
       }
